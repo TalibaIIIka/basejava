@@ -39,15 +39,6 @@ public abstract class AbstractArrayStorage implements Storage {
         }
     }
 
-    public Resume get(String uuid) {
-        int index = getIndex(uuid);
-        if (index < 0) {
-            System.out.println("Resume " + uuid + " doesn't exist");
-            return null;
-        }
-        return storage[index];
-    }
-
     public void delete(String uuid) {
         int index = getIndex(uuid);
         if (index == -1) {
@@ -57,6 +48,15 @@ public abstract class AbstractArrayStorage implements Storage {
             size--;
             storage[size] = null;
         }
+    }
+
+    public Resume get(String uuid) {
+        int index = getIndex(uuid);
+        if (index < 0) {
+            System.out.println("Resume " + uuid + " doesn't exist");
+            return null;
+        }
+        return storage[index];
     }
 
     /**
