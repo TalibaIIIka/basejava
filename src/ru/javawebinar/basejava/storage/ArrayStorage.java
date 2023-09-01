@@ -1,5 +1,7 @@
 package ru.javawebinar.basejava.storage;
 
+import ru.javawebinar.basejava.exception.ExistStorageException;
+import ru.javawebinar.basejava.exception.StorageException;
 import ru.javawebinar.basejava.model.Resume;
 
 /**
@@ -9,9 +11,9 @@ public class ArrayStorage extends AbstractArrayStorage {
 
     public void save(Resume r) {
         if (getIndex(r.getUuid()) != -1) {
-            System.out.println("Resume " + r.getUuid() + " already exist");
+            throw new ExistStorageException(r.getUuid());
         } else if (size >= STORAGE_LIMIT) {
-            System.out.println("Storage overflow");
+            throw new StorageException("Storage overflow", r.getUuid());
         } else {
             storage[size] = r;
             size++;
@@ -20,7 +22,7 @@ public class ArrayStorage extends AbstractArrayStorage {
 
     @Override
     protected void fillDeletedElement(int index) {
-        storage[index] = storage[size];
+        storage[index] = storage[size - 1];
     }
 
     protected int getIndex(String uuid) {
