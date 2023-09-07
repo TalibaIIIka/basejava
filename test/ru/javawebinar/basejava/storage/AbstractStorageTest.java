@@ -10,7 +10,7 @@ import ru.javawebinar.basejava.model.Resume;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-class AbstractArrayStorageTest {
+class AbstractStorageTest {
     private final Storage storage;
 
     private static final String UUID_1 = "uuid1";
@@ -22,7 +22,7 @@ class AbstractArrayStorageTest {
     private static final String UUID_4 = "uuid4";
     private static final Resume RESUME_4 = new Resume(UUID_4);
 
-    public AbstractArrayStorageTest(Storage storage) {
+    public AbstractStorageTest(Storage storage) {
         this.storage = storage;
     }
 
