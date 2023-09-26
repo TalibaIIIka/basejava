@@ -4,7 +4,7 @@ import ru.javawebinar.basejava.model.Resume;
 
 import java.util.*;
 
-public class MapUuidStorage extends AbstractStorage {
+public class MapUuidStorage extends AbstractStorage<String> {
     private Map<String, Resume> resumes = new HashMap<>();
 
     @Override
@@ -13,27 +13,27 @@ public class MapUuidStorage extends AbstractStorage {
     }
 
     @Override
-    protected void doUpdate(Resume r, Object uuid) {
-        resumes.put((String) uuid, r);
+    protected void doUpdate(Resume r, String uuid) {
+        resumes.put(uuid, r);
     }
 
     @Override
-    protected boolean isExist(Object uuid) {
+    protected boolean isExist(String uuid) {
         return resumes.containsKey(uuid);
     }
 
     @Override
-    protected void doSave(Resume r, Object uuid) {
-        resumes.put((String) uuid, r);
+    protected void doSave(Resume r, String uuid) {
+        resumes.put(uuid, r);
     }
 
     @Override
-    protected Resume doGet(Object searchKey) {
+    protected Resume doGet(String searchKey) {
         return resumes.get(searchKey);
     }
 
     @Override
-    protected void doDelete(Object searchKey) {
+    protected void doDelete(String searchKey) {
         resumes.remove(searchKey);
     }
 
