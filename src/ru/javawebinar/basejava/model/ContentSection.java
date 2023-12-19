@@ -5,7 +5,10 @@ import java.util.Objects;
 
 public class ContentSection extends Section implements Serializable {
     private static final long serialVersionUID = 1L;
-    private final String content;
+    private String content;
+
+    public ContentSection() {
+    }
 
     public ContentSection(String content) {
         Objects.requireNonNull(content, "Content must not be null");
