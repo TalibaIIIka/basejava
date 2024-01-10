@@ -15,6 +15,10 @@ public class ContentSection extends Section implements Serializable {
         this.content = content;
     }
 
+    public String getContent() {
+        return content;
+    }
+
     @Override
     public String toString() {
         return content;
