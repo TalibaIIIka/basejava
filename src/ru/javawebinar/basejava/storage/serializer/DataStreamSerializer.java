@@ -4,9 +4,7 @@ import ru.javawebinar.basejava.model.*;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataStreamSerializer implements StreamSerializer {
 
@@ -34,30 +32,30 @@ public class DataStreamSerializer implements StreamSerializer {
                         break;
                     case ACHIEVEMENT:
                     case QUALIFICATIONS:
-                        ListSection listSection = (ListSection) section;
-                        dos.writeInt(listSection.getItems().size());
-                        for (String item : listSection.getItems()) {
-                            dos.writeUTF(item);
-                        }
+                        writeCollection(dos, ((ListSection) section).getItems(), dos::writeUTF);
                         break;
                     case EXPERIENCE:
                     case EDUCATION:
-                        OrganizationSection organizationSection = (OrganizationSection) section;
-                        dos.writeInt(organizationSection.getOrganizations().size());
-                        for (Organization organization : organizationSection.getOrganizations()) {
+                        writeCollection(dos, ((OrganizationSection) section).getOrganizations(), organization -> {
                             dos.writeUTF(organization.getHomePage().getName());
                             dos.writeUTF(organization.getHomePage().getUrl());
-                            dos.writeInt(organization.getPositions().size());
-                            for (Organization.Position position : organization.getPositions()) {
+                            writeCollection(dos, organization.getPositions(), position -> {
                                 writeDate(dos, position.getStartDate());
                                 writeDate(dos, position.getEndDate());
                                 dos.writeUTF(position.getTitle());
                                 dos.writeUTF(position.getDescription());
-                            }
-                        }
+                            });
+                        });
                         break;
                 }
             }
+        }
+    }
+
+    private static <T> void writeCollection(DataOutputStream dos, Collection<T> collection, ElementWriter<T> writer) throws IOException {
+        dos.writeInt(collection.size());
+        for (T item : collection) {
+            writer.write(item);
         }
     }
 
@@ -122,5 +120,9 @@ public class DataStreamSerializer implements StreamSerializer {
     private void writeDate(DataOutputStream dos, LocalDate localDate) throws IOException {
         dos.writeInt(localDate.getYear());
         dos.writeInt(localDate.getMonthValue());
+    }
+
+    private interface ElementWriter<T> {
+        void write(T t) throws IOException;
     }
 }
