@@ -58,49 +58,32 @@ public class DataStreamSerializer implements StreamSerializer {
             String uuid = dis.readUTF();
             String fullName = dis.readUTF();
             Resume resume = new Resume(uuid, fullName);
-            int size = dis.readInt();
-            for (int i = 0; i < size; i++) {
-                resume.addContact(ContactType.valueOf(dis.readUTF()), dis.readUTF());
-            }
-
-            size = dis.readInt();
-            for (int i = 0; i < size; i++) {
+            readItems(dis, () -> resume.addContact(ContactType.valueOf(dis.readUTF()), dis.readUTF()));
+            readItems(dis, () -> {
                 SectionType sectionType = SectionType.valueOf(dis.readUTF());
-                resume.addSection(sectionType, getSection(dis, sectionType));
-            }
+                resume.addSection(sectionType, readSection(dis, sectionType));
+            });
             return resume;
         }
     }
 
-    private Section getSection(DataInputStream dis, SectionType sectionType) throws IOException {
+    private Section readSection(DataInputStream dis, SectionType sectionType) throws IOException {
         switch (sectionType) {
             case PERSONAL:
             case OBJECTIVE:
                 return new ContentSection(dis.readUTF());
             case ACHIEVEMENT:
             case QUALIFICATIONS:
-                int size = dis.readInt();
-                List<String> listSection = new LinkedList<>();
-                for (int i = 0; i < size; i++) {
-                    listSection.add(dis.readUTF());
-                }
-                return new ListSection(listSection);
+                return new ListSection(readList(dis, dis::readUTF));
             case EXPERIENCE:
             case EDUCATION:
-                size = dis.readInt();
-                List<Organization> organizations = new LinkedList<>();
-                for (int i = 0; i < size; i++) {
-                    Link link = new Link(dis.readUTF(), dis.readUTF());
-                    int sizePositions = dis.readInt();
-                    List<Organization.Position> positions = new LinkedList<>();
-                    for (int j = 0; j < sizePositions; j++) {
-                        positions.add(new Organization.Position(
-                                readDate(dis), readDate(dis), dis.readUTF(), dis.readUTF()
-                        ));
-                    }
-                    organizations.add(new Organization(link, positions));
-                }
-                return new OrganizationSection(organizations);
+                return new OrganizationSection(
+                        readList(dis, () -> new Organization(
+                                new Link(dis.readUTF(), dis.readUTF()),
+                                readList(dis, () -> new Organization.Position(
+                                        readDate(dis), readDate(dis), dis.readUTF(), dis.readUTF()
+                                ))
+                        )));
             default:
                 throw new IllegalStateException();
         }
@@ -115,6 +98,18 @@ public class DataStreamSerializer implements StreamSerializer {
         dos.writeInt(localDate.getMonthValue());
     }
 
+    private interface ElementWriter<T> {
+        void write(T t) throws IOException;
+    }
+
+    private interface ElementReader<T> {
+        T read() throws IOException;
+    }
+
+    private interface ElementProcessor {
+        void process() throws IOException;
+    }
+
     private static <T> void writeCollection(DataOutputStream dos, Collection<T> collection, ElementWriter<T> writer) throws IOException {
         dos.writeInt(collection.size());
         for (T item : collection) {
@@ -122,7 +117,19 @@ public class DataStreamSerializer implements StreamSerializer {
         }
     }
 
-    private interface ElementWriter<T> {
-        void write(T t) throws IOException;
+    private <T> List<T> readList(DataInputStream dis, ElementReader<T> reader) throws IOException {
+        int size = dis.readInt();
+        List<T> list = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            list.add(reader.read());
+        }
+        return list;
+    }
+
+    private void readItems(DataInputStream dis, ElementProcessor processor) throws IOException {
+        int size = dis.readInt();
+        for (int i = 0; i < size; i++) {
+            processor.process();
+        }
     }
 }
