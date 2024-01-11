@@ -52,13 +52,6 @@ public class DataStreamSerializer implements StreamSerializer {
         }
     }
 
-    private static <T> void writeCollection(DataOutputStream dos, Collection<T> collection, ElementWriter<T> writer) throws IOException {
-        dos.writeInt(collection.size());
-        for (T item : collection) {
-            writer.write(item);
-        }
-    }
-
     @Override
     public Resume doRead(InputStream is) throws IOException {
         try (DataInputStream dis = new DataInputStream(is)) {
@@ -120,6 +113,13 @@ public class DataStreamSerializer implements StreamSerializer {
     private void writeDate(DataOutputStream dos, LocalDate localDate) throws IOException {
         dos.writeInt(localDate.getYear());
         dos.writeInt(localDate.getMonthValue());
+    }
+
+    private static <T> void writeCollection(DataOutputStream dos, Collection<T> collection, ElementWriter<T> writer) throws IOException {
+        dos.writeInt(collection.size());
+        for (T item : collection) {
+            writer.write(item);
+        }
     }
 
     private interface ElementWriter<T> {
