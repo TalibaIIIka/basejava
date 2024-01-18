@@ -90,7 +90,7 @@ public class DataStreamSerializer implements StreamSerializer {
     }
 
     private LocalDate readDate(DataInputStream dis) throws IOException {
-        return LocalDate.of(dis.readInt(), dis.readInt(),1);
+        return LocalDate.of(dis.readInt(), dis.readInt(), 1);
     }
 
     private void writeDate(DataOutputStream dos, LocalDate localDate) throws IOException {
